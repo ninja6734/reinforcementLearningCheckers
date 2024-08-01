@@ -9,8 +9,11 @@ class agent:
         self.pID = pID
     
     def getQValue(self,state, action) -> float:
-        if state in self.qTable and action in self.qTable[state]:
-            return self.qTable[state][action]
+        if state in self.qTable:
+            if action in self.qTable[state]:
+                return self.qTable[state][action]
+            else:
+                return 0.0
         else:
             return 0.0
     
@@ -22,19 +25,21 @@ class agent:
     def chooseAction(self,state,availableActions,epsilon = None):
         if epsilon != None:
             if random.random() < epsilon:
-                return random.choice(availableActions)
+                return [random.choice(availableActions), 1.0]
             else:
-                q_values= {"action": self.getQValue(state,action) for action in availableActions}
-                return max(q_values, key=q_values.get)
+                actions = [action for action in availableActions]
+                q_values= [self.getQValue(state,action) for action in availableActions]
+                return [actions[q_values.index(max(q_values))], max(q_values)]
         else:
             if random.random() < self.epsilon:
-                return random.choice(availableActions)
+                return [random.choice(availableActions), 1.0]
             else:
-                q_values= {"action": self.getQValue(state,action) for action in availableActions}
-                return max(q_values, key=q_values.get)
+                actions = [action for action in availableActions]
+                q_values= [self.getQValue(state,action) for action in availableActions]
+                return [actions[q_values.index(max(q_values))], max(q_values)]
         
     def updateQTable(self,state,action,reward,nextState,nextAvailableActions):
         bestNextAction = self.chooseAction(nextState,nextAvailableActions,0)
-        tdTarget = reward + self.gamma * self.getQValue(nextState,bestNextAction)
+        tdTarget = reward + self.gamma * self.getQValue(nextState,bestNextAction[0])
         tdError = tdTarget - self.getQValue(state,action)
         self.setQValue(state,action,self.getQValue(state,action) + self.alpha * tdError)
