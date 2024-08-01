@@ -6,7 +6,10 @@ class Environment:
             column = []
             for row in range(8):
                 if(row % 2 == columns % 2):
-                    column.append(int(columns < 4)*2-1)
+                    if(columns < 5 and columns > 2):
+                        column.append(0)
+                    else:
+                        column.append(int(columns < 4)*2-1)
                 else:
                     column.append(0)
             self.board.append(column)
@@ -47,6 +50,49 @@ class Environment:
         res = self.changeEnv([X,Y],piece)
         self.sendReward(res[0], res[1], res[2])
         return self.reward
+    
+    def getActionsOfPiece(self, pieceCoor, piece):
+        actions = []
+        posX = [pieceCoor[1]]  # List to track x-coordinates
+        posY = [pieceCoor[0]]  # List to track y-coordinates
+        
+        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]  # Possible directions to explore
 
-env = Environment()
-print(env.makeAction([1,2],1))
+        while posX:
+            currentX = posX.pop(0)  # Get the current x-coordinate and remove it from the list
+            currentY = posY.pop(0)  # Get the current y-coordinate and remove it from the list
+
+            for dirX, dirY in directions:
+                nextX = currentX + dirX
+                nextY = currentY + dirY
+                
+                if 0 <= nextX < len(self.board[0]) and 0 <= nextY < len(self.board):
+                    testingSpot = self.board[nextY][nextX]
+                    
+                    if testingSpot != piece:
+                        if testingSpot == 0:
+                            actions.append((nextY, nextX))  # Valid move
+                        else:
+                            position = (nextY + dirY, nextX + dirX)
+                            if (0 <= position[1] < len(self.board[0]) and
+                                0 <= position[0] < len(self.board)):
+                                actions.append(position)  # Capture move
+                                posX.append(position[1])
+                                posY.append(position[0])
+        
+        return actions
+
+    
+    def getActions(self,piece):
+        availablePieces = []
+        actions = []
+        for columnCnt, row in enumerate(self.board()):
+            for rowCnt, curPiece in enumerate(row):
+                if curPiece == piece:
+                    availablePieces.append((columnCnt, rowCnt))
+        for availablePiece in availablePieces:
+            actions.append(self.getActionsOfPiece(availablePiece,piece))
+        
+        actions = [item for sub_list in actions for item in sub_list]
+
+    
