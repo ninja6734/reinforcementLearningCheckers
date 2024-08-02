@@ -1,7 +1,7 @@
 from agent import agent
 from env import Environment
 import tkinter as tk
-import time
+import pickle
 
 #bad_setup: [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 0, -2], [-1, 0, 0, 0, 0, 0, -1, 0], [0, -1, 0, 2, 0, -1, 0, -1]]
 
@@ -59,62 +59,49 @@ def game():
     while moment < moments:
         state = envi.boardToTuple()
         availableActions = envi.getActions(player1.pID)
-        print(availableActions)
         if(availableActions):
             choice, expectedReward = player1.chooseAction(state,availableActions)
         else:
-            print(availableActions)
-            print("p1 has no more moves")
             winner = "p2"
             break
-        print("player1 chose")
         reward,won = envi.makeAction(choice,player1.pID)
         if(won == True):
             winner = "p1"
             break
-        print("test1")
         next_state = envi.boardToTuple()
-        print("test2")
-        print(envi.board)
         next_action = envi.getActions(player1.pID)
-        print("test3")
         if(next_action):
             player1.updateQTable(state,choice,reward,next_state,next_action)
-        print("player1 done")
-
         
         state = envi.boardToTuple()
         availableActions = envi.getActions(player2.pID)
-        print(availableActions)
         if(availableActions):
             choice, expectedReward = player2.chooseAction(state,availableActions)
         else:
-            print(availableActions)
-            print("p2 has no more moves")
             winner = "p1"
             break
-        print("player2 chose")
         reward,won = envi.makeAction(choice,player2.pID)
         if(won == True):
             winner = "p2"
             break
-        print("test1")
         next_state = envi.boardToTuple()
-        print("test2")
         next_action = envi.getActions(player2.pID)
-        print("test3")
         if(next_action):
             player2.updateQTable(state,choice,reward,next_state,next_action)
-        print("player2 done")
+
 
 
         moment += 1
-        time.sleep(0.2)
 
-    print(winner)
-    print(envi.board)
+    return winner
 
-for gme in range(100):
-    game()
+for gme in range(1000):
+    winner = game()
+    print(gme)
+if(winner == "p1"):
+    dict = player1.qTable
+else:
+    dict = player2.qTable
 
-showBoard((-1,-1,-1,-1))
+f = open("qTable.pkl","wb")
+pickle.dump(dict, f)

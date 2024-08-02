@@ -5,6 +5,7 @@ class Environment:
         self.resetBoard()
 
     def resetBoard(self):
+        self.board = []
         for columns in range(8):
             column = []
             for row in range(8):
@@ -74,7 +75,6 @@ class Environment:
                 directions = [(1,-1),(-1,-1)]
         first = True
         while posX:
-            print(posX)
             currentX = posX.pop(0)  # Get the current x-coordinate and remove it from the list
             currentY = posY.pop(0)  # Get the current y-coordinate and remove it from the list
             
@@ -102,7 +102,6 @@ class Environment:
                                 if (0 <= position[1] < len(self.board[0]) and
                                     0 <= position[0] < len(self.board) and not position in visitedPositions):
                                     secondTestingSpot = self.board[position[0]][position[1]]
-                                    print(f"secondTestingSpot: {secondTestingSpot} action: {position} start: {pieceCoor}")
                                     if(secondTestingSpot == 0):
                                         actions.append(pieceCoor + visPos + (position[0] - dirY ,position[1] - dirX) + position)  # Capture move
                                         visPos = visPos + (position[0] - dirY ,position[1] - dirX) + position
@@ -125,8 +124,6 @@ class Environment:
                             posY.append(nextY)
                             visitedPositions.append(position)
 
-
-        
         return actions
 
     
@@ -141,7 +138,6 @@ class Environment:
             actions.append(self.getActionsOfPiece(availablePiece,piece))
         
         actions = [item for sub_list in actions for item in sub_list]
-        print(actions)
         if(actions):
             return actions
         else:
