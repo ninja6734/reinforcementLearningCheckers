@@ -36,6 +36,7 @@ class agent:
             else:
                 actions = [action for action in availableActions]
                 q_values= [self.getQValue(state,action) for action in availableActions]
+                print(q_values)
                 return [actions[q_values.index(max(q_values))], max(q_values)]
         
     def updateQTable(self,state,action,reward,nextState,nextAvailableActions):

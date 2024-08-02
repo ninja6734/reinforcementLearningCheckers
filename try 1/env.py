@@ -44,8 +44,8 @@ class Environment:
         X = []
         Y = []
         for act in range(int(len(acts)/2)):
-            X.append(acts[act * 2])
-            Y.append(acts[act * 2 +1])
+            X.append(acts[act * 2 + 1])
+            Y.append(acts[act * 2])
 
         res = self.changeEnv([X,Y],piece)
         self.sendReward(res[0], res[1], res[2])
@@ -58,7 +58,10 @@ class Environment:
         posY = [pieceCoor[0]]  # List to track y-coordinates
         visitedPositions = [pieceCoor]
         
-        directions = [(1, 1), (1, -1), (-1, 1), (-1, -1)]
+        if(piece == 1):
+            directions = [(1, 1), (-1, 1)]
+        else:
+            directions = [(1,-1),(-1,-1)]
         first = True
         while posX:
             currentX = posX.pop(0)  # Get the current x-coordinate and remove it from the list
