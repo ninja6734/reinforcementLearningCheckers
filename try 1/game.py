@@ -1,12 +1,11 @@
-from agent import agent
+from agent import Agent
 from env import Environment
 import tkinter as tk
 import pickle
 
-#bad_setup: [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 0, -2], [-1, 0, 0, 0, 0, 0, -1, 0], [0, -1, 0, 2, 0, -1, 0, -1]]
 
-player1 = agent(1)
-player2 = agent(-1)
+player1 = Agent(64,32,100,1)
+player2 = Agent(64,32,100,-1)
 envi = Environment()
 window = tk.Tk()
 window.geometry("600x600")
@@ -52,56 +51,64 @@ def showBoard(move):
 
     window.mainloop()
     
-def game():
+def moveOfPlayer(playerObject):
+    state = envi.boardToTuple().reshape(1, -1)  # Current state as a flattened array
+    available_actions = envi.getActions(playerObject.pID)  # Get available actions for the current state
+    if(not available_actions):
+        return 0,0
+    else:
+        action = playerObject.choose_action(state, available_actions)  # Choose an action
+        reward,won = envi.makeAction(action,playerObject.pID)
+        if(won):
+            return 2,action
+        else:
+            next_state = envi.boardToTuple().reshape(1, -1)  # Get the next state
+            next_available_actions = envi.getActions(playerObject.pID)  # Get available actions for the next state
+            if(next_available_actions):
+                # Update the agent based on the transition
+                playerObject.update(state, action, reward, next_state, available_actions, next_available_actions)
+
+            return 1,action
+
+
+def game(show = False):
     envi.resetBoard()
     moments = 1000
     moment = 0
     while moment < moments:
-        state = envi.boardToTuple()
-        availableActions = envi.getActions(player1.pID)
-        if(availableActions):
-            choice, expectedReward = player1.chooseAction(state,availableActions)
-        else:
+        win,action = moveOfPlayer(player1)
+        if(0 == win):
             winner = "p2"
             break
-        reward,won = envi.makeAction(choice,player1.pID)
-        if(won == True):
+        elif(2 == win):
             winner = "p1"
             break
-        next_state = envi.boardToTuple()
-        next_action = envi.getActions(player1.pID)
-        if(next_action):
-            player1.updateQTable(state,choice,reward,next_state,next_action)
-        
-        state = envi.boardToTuple()
-        availableActions = envi.getActions(player2.pID)
-        if(availableActions):
-            choice, expectedReward = player2.chooseAction(state,availableActions)
-        else:
-            winner = "p1"
-            break
-        reward,won = envi.makeAction(choice,player2.pID)
-        if(won == True):
+        if(show):
+            showBoard(action)
+
+        win,action = moveOfPlayer(player2)
+        if(0 == win):
             winner = "p2"
             break
-        next_state = envi.boardToTuple()
-        next_action = envi.getActions(player2.pID)
-        if(next_action):
-            player2.updateQTable(state,choice,reward,next_state,next_action)
-
-
+        elif(2 == win):
+            winner = "p1"
+            break
+        if(show):
+            showBoard(action)
 
         moment += 1
 
     return winner
 
-for gme in range(1000):
+for gme in range(200):
     winner = game()
     print(gme)
+
+winner = game(show=True)
 if(winner == "p1"):
-    dict = player1.qTable
+    data = player1.model
 else:
-    dict = player2.qTable
+    data = player2.model
 
 f = open("qTable.pkl","wb")
-pickle.dump(dict, f)
+pickle.dump(data, f)

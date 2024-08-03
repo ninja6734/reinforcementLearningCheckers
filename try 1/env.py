@@ -1,3 +1,5 @@
+import numpy as np
+
 class Environment:
     def __init__(self):
         self.reward = 0
@@ -46,7 +48,7 @@ class Environment:
 
 
     def sendReward(self,enPiecesDestroyed: int, Promotion: bool, Won: bool):
-        self.reward += 10 * enPiecesDestroyed + 4 * int(Promotion) + 50 * int(Won)
+        self.reward = -20 + 30 * enPiecesDestroyed + 20 * int(Promotion) + 200 * int(Won)
     
     def makeAction(self,acts,piece):
         actsList = []
@@ -144,5 +146,5 @@ class Environment:
             return False
     
     def boardToTuple(self):
-        return tuple([item for sub_list in self.board for item in sub_list])
+        return np.array([item for sub_list in self.board for item in sub_list])
     
