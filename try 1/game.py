@@ -6,6 +6,12 @@ import pickle
 
 player1 = Agent(64,32,100,1)
 player2 = Agent(64,32,100,-1)
+
+f = open("qTable.pkl","rb")
+data = pickle.load(f)
+player1.load(data)
+player2.load(data)
+
 envi = Environment()
 window = tk.Tk()
 window.geometry("600x600")
@@ -100,15 +106,22 @@ def game(show = False):
 
     return winner
 
-for gme in range(200):
-    winner = game()
-    print(gme)
-
-winner = game(show=True)
-if(winner == "p1"):
-    data = player1.model
-else:
-    data = player2.model
-
-f = open("qTable.pkl","wb")
-pickle.dump(data, f)
+def main(learn = False):
+    out = "y"
+    if(learn):
+    
+        for gme in range(4000):
+            winner = game()
+            print(gme)
+        if(winner == "p1"):
+            data = player1.model
+        else:
+            data = player2.model
+        f = open("qTable.pkl","wb")
+        pickle.dump(data, f)
+    else:
+        print(out)
+        while out == "y":
+            print(f"winner: {game(show = True)}")
+            input("continue? y/n")
+main()

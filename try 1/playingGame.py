@@ -1,15 +1,16 @@
-from agent import agent
+from agent import Agent
 from env import Environment
 import tkinter as tk
 import pickle
 import ast
 import random
 
-#bad_setup: [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1, 0, -2], [-1, 0, 0, 0, 0, 0, -1, 0], [0, -1, 0, 2, 0, -1, 0, -1]]
+def playerMove(pMove):
+    move = pMove
 
-player1 = agent(1)
-with open("qTable.pkl", "rb") as pickle_file:
-    data = pickle.load(pickle_file)
+player1 = Agent(64,32,100,1)
+f = open("qTable.pkl","rb")
+data = pickle.load(f)
 player1.load(data)
 envi = Environment()
 window = tk.Tk()
@@ -20,8 +21,8 @@ text = tk.Label(window)
 text.pack()
 button = tk.Button(window,text="Next", command=lambda: window.quit())
 button.pack()
-textbox = tk.Text(window, width=100,height=30)
-textbox.pack()
+Entry = tk.Text(window, width=100, height=1)
+Entry.pack()
 
 def getFieldX(rowNum):
     return 50+rowNum * 40
@@ -46,65 +47,67 @@ def showField(canvas,move):
                     canvas.create_oval(30+rowNum * 40,350 - colNum * 40,70 + rowNum * 40,310 - colNum * 40,fill="cyan")
                 elif(row==-2):
                     canvas.create_oval(30+rowNum * 40,350 - colNum * 40,70 + rowNum * 40,310 - colNum * 40,fill="purple")
-        if(move):
-            for act in range(int(len(move) / 2)-1):
-                x1,y1,x2,y2 = [getFieldX(move[act * 2 + 1]),getFieldY(move[act * 2]),getFieldX(move[act * 2 + 3]),getFieldY(move[act * 2+2])]
-                canvas.create_line(x1,y1,x2,y2,width=3)
+    
+        for act in range(int(len(move) / 2)-1):
+            x1,y1,x2,y2 = [getFieldX(move[act * 2 + 1]),getFieldY(move[act * 2]),getFieldX(move[act * 2 + 3]),getFieldY(move[act * 2+2])]
+            canvas.create_line(x1,y1,x2,y2,width=3)
 
-def showBoard(move=None):
-    if(move):
-        text.config(text=move)
+def showBoard(move, fake = True):
+    text.config(text=move)
 
-    showField(canvas,move)
+    if (fake):
+        showField(canvas,move)
 
     window.mainloop()
     
-def game():
+def moveOfPlayer(playerObject):
+    state = envi.boardToTuple().reshape(1, -1)  # Current state as a flattened array
+    available_actions = envi.getActions(playerObject.pID)  # Get available actions for the current state
+    if(not available_actions):
+        return 0,0
+    else:
+        action = playerObject.choose_action(state, available_actions)  # Choose an action
+        reward,won = envi.makeAction(action,playerObject.pID)
+        if(won):
+            return 2,action
+        else:
+            next_state = envi.boardToTuple().reshape(1, -1)  # Get the next state
+            next_available_actions = envi.getActions(playerObject.pID)  # Get available actions for the next state
+            if(next_available_actions):
+                # Update the agent based on the transition
+                playerObject.update(state, action, reward, next_state, available_actions, next_available_actions)
+
+            return 1,action
+
+
+def game(show = False):
     envi.resetBoard()
     moments = 1000
     moment = 0
     while moment < moments:
-        state = envi.boardToTuple()
-        availableActions = envi.getActions(player1.pID)
-        if(availableActions):
-            choice, expectedReward = player1.chooseAction(state,availableActions)
-        else:
+        win,action = moveOfPlayer(player1)
+        if(0 == win):
             winner = "p2"
             break
-        reward,won = envi.makeAction(choice,player1.pID)
-        print(f"reward: {reward} expected reward: {expectedReward}")
-        if(won == True):
+        elif(2 == win):
             winner = "p1"
             break
-        next_state = envi.boardToTuple()
-        next_action = envi.getActions(player1.pID)
-        if(next_action):
-            player1.updateQTable(state,choice,reward,next_state,next_action)
-        showBoard(choice)
+        if(show):
+            showBoard(action)
         
         availableActions = envi.getActions(-1)
-        if(availableActions):
-            text.config(text="Enter next move: ")
-        else:
-            winner = "p1"
-            break
-        move = None
-        while not move in availableActions:
-            showBoard()
-            move = textbox.get(1.0,100.0)
+        print(envi.board)
+        showBoard("submit you action invalid = random (y1,x1,y2,x2) = move \n available actions include: "+ str(availableActions),fake=False)
+        try:
             move = ast.literal_eval(move)
-            if(move == ()):
-                move = random.choice(availableActions)
-        
-        _,won = envi.makeAction(move,-1)
-        if(won == True):
-            winner = "p2"
-            break
-
-
+        except:
+            move = random.choice(availableActions)
+        if(not move in availableActions):
+            move = random.choice(availableActions)
+        envi.makeAction(move,-1)
 
         moment += 1
 
     return winner
 
-print(game())
+winner = game(show=True)
