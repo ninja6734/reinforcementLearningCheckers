@@ -59,115 +59,90 @@ class Environment:
         self.sendReward(res[0], res[1], res[2])
         return self.reward,res[2]
     
-    def getActionsOfPiece(self, pieceCoor, piece):
-        fixedDirections = None
-        actions = []
-        posX = [pieceCoor[1]]  # List to track x-coordinates
-        visPos = ()
-        posY = [pieceCoor[0]]  # List to track y-coordinates
-        visitedPositions = [pieceCoor]
-        if(abs(self.board[pieceCoor[0]][pieceCoor[1]]) > 1):
-            directions = [(1,1),(-1,1),(-1,-1),(1,-1)]
-            promoted = True
+    def isInActionList(self,actionList,act):
+        _actionList = []
+        for index in range(len(actionList)//2):
+              _actionList.append([actionList[index*2],actionList[index*2+1]])
+        return act in _actionList
+    def obtainSingleActionOfPiece(self,pieceID, lastPositions, actions, First=True):
+        _actions = actions
+        _lastPositions = lastPositions
+        
+        if _lastPositions:
+            if type(_lastPositions[0][-1]) == type([]):
+                directions = _lastPositions[0].pop(-1)
+                
+            else:
+                directions = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
+                if pieceID == 1:
+                    directions = directions[:2]
+                elif pieceID == -1:
+                    directions = directions[2:]
+
+            pos = _lastPositions.pop(0)
+            for dirY, dirX in directions:
+                nextX = pos[-1] + dirX
+                nextY = pos[-2] + dirY
+                if 0 <= nextX < 8 and 0 <= nextY < 8:
+                    testingSpace = self.board[nextY][nextX]
+                    if testingSpace == 0:
+                        if abs(pieceID) == 2:
+                            # promoted and no take
+                            positions = pos + [nextY, nextX]
+                            positions.append([[dirX, dirY]])
+                            if(not self.isInActionList(positions, [nextY, nextX])):
+                                _lastPositions.append(positions)
+                            
+                            _actions.append(positions)
+                            self.obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)
+                        elif First:
+                            # not promoted and no take
+                            positions = pos + [nextY, nextX]
+                            _actions.append(positions)
+                            self.obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)
+                    elif not testingSpace / abs(testingSpace) == pieceID / abs(pieceID):
+                        if 0 <= (nextX + dirX) < 8 and 0 <= (nextY + dirY) < 8:
+                            testingSpace = self.board[nextY + dirY][nextX + dirX]
+                            if abs(pieceID) == 2:
+                                # promoted and a take
+                                if testingSpace == 0:
+                                    positions = pos + [nextY, nextX, nextY + dirY, nextX + dirX]
+                                    
+                                    if(not self.isInActionList(positions, [nextY, nextX])):
+                                        _lastPositions.append(positions)
+                                    _actions.append(positions)
+                                    self.obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)
+                            else:
+                                # not promoted and a take
+                                if testingSpace == 0:
+                                    positions = pos + [nextY, nextX, nextY + dirY, nextX + dirX]
+                                    if(not self.isInActionList(positions, [nextY, nextX])):
+                                        _lastPositions.append(positions)
+                                    _actions.append(positions)
+                                    self.obtainSingleActionOfPiece(pieceID, _lastPositions, _actions, First=False)
+            # After the loop completes
+            return _actions
         else:
-            promoted = False
-            if(piece == 1):
-                directions = [(1, 1), (-1, 1)]
-            else:
-                directions = [(1,-1),(-1,-1)]
-        first = True
-        #search every position
-        while posX:
-            if(pieceCoor == (3,5)):
-                print(posX,posY)
-            currentX = posX.pop(0)  # Get the current x-coordinate and remove it from the list
-            currentY = posY.pop(0)  # Get the current y-coordinate and remove it from the list
-            
-            #fixed direction = king already moved in a direction
-            if(fixedDirections == None):
-                #no fixed direction
-                for dirX, dirY in directions:
-                    #get every possible move position
-                    nextX = currentX + dirX
-                    nextY = currentY + dirY
-                    
-                    #if this position is on the board
-                    if 0 <= nextX < len(self.board[0]) and 0 <= nextY < len(self.board):
-                        testingSpot = self.board[nextY][nextX]
-                        #testingSpot = piece on the board
-                        
-                        if testingSpot != piece or testingSpot != piece*2:
-                            #if the piece isn't your own
-                            if testingSpot == 0 and first:
-                                #if the spot is empty and you haven't taken a piece yet
-                                actions.append(pieceCoor + (nextY, nextX))  #append valid move
-                                print(actions)
-                                position = (nextY,nextX)
-                                #if the piece has been promoted (can move more than 1 space)
-                                if(promoted):
-                                    #set the fixed direction to only move in that direction
-                                    fixedDirections = [dirY,dirX]
-                                    #if the space has not been visited yet and is on the board
-                                    if (0 <= position[1] < len(self.board[0]) and
-                                    0 <= position[0] < len(self.board) and not position in visitedPositions):
-                                        posX.append(nextX)
-                                        posY.append(nextY)
-                                        visitedPositions.append(position)
-                                        #append the new coordinate as a new starting point
-                            elif testingSpot == -piece or testingSpot == -2 * piece:
-                                #if the piece is an opponent piece
-                                print(f"next: {nextX, nextY}")
-                                position = (nextY + dirY, nextX + dirX)
-                                #look for the space right after in the given direction
-                                if (0 <= position[1] < len(self.board[0]) and
-                                    0 <= position[0] < len(self.board) and not position in visitedPositions):
-                                    #secondTestingSpot = piece on the field on after
-                                    secondTestingSpot = self.board[position[0]][position[1]]
-                                    if(secondTestingSpot == 0):
-                                        #space empyty
-                                        actions.append(pieceCoor + visPos + (position[0] - dirY ,position[1] - dirX) + position)  # Capture move
-                                        visPos = visPos + (position[0] - dirY ,position[1] - dirX) + position
-                                        first = False
-                                        posX.append(position[1])
-                                        posY.append(position[0])
-                                        visitedPositions.append(position)
-                                        if(pieceCoor == (3,5)):
-                                            print(f"act: {actions}")
-                                            print(posX[0],posY[0])
-                                            print(position)
-            else:
-                nextX = currentX + fixedDirections[1]
-                nextY = currentY + fixedDirections[0]
-                    
-                if 0 <= nextX < len(self.board[0]) and 0 <= nextY < len(self.board):
-                    testingSpot = self.board[nextY][nextX]
-                    if(testingSpot == 0):
-                        actions.append(pieceCoor + (nextY, nextX))  # Valid move
-                        position = (nextY,nextX)
-                        if (0 <= position[1] < len(self.board[0]) and
-                        0 <= position[0] < len(self.board) and not position in visitedPositions):
-                            posX.append(nextX)
-                            posY.append(nextY)
-                            visitedPositions.append(position)
-        return actions
+            return _actions
+
 
     
-    def getActions(self,piece):
-        availablePieces = []
-        actions = []
-        for columnCnt, row in enumerate(self.board):
-            for rowCnt, curPiece in enumerate(row):
-                if curPiece*  piece > 0:
-                    availablePieces.append((columnCnt, rowCnt))
-        for availablePiece in availablePieces:
-            actions.append(self.getActionsOfPiece(availablePiece,piece))
+    def getActionsOfPiece(self,pieceID,coor):
+        actions = self.obtainSingleActionOfPiece(pieceID, [coor], [])
         
-        actions = [item for sub_list in actions for item in sub_list]
-        if(actions):
-            return actions
-        else:
-            return False
-    
+        return actions
+
+
+    def getActions(self,piece):
+        actions = []
+        for colCnt,col in enumerate(self.board):
+            for rowCnt, row in enumerate(col):
+                if row * piece > 0:
+                    e = self.getActionsOfPiece(row,[colCnt,rowCnt])
+                    actions.extend(e)
+        
+        return actions
+        
     def boardToTuple(self):
         return np.array([item for sub_list in self.board for item in sub_list])
-    
+        

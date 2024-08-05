@@ -1,22 +1,23 @@
-board = [[1, 0, 1, 0, 0, 0, 1, 0], [0, 0, 0, -1, 0, 0, 0, 1], [1, 0, -1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 1, 0, -1], [2, 0, 0, 0, -1, 0, -1, 0], [0, 0, 0, 0, 0, -1, 0, 0], [0, 0, 0, 0, 2, 0, 0, 0], [0, 0, 0, 0, 0, -1, 0, 0]]
+board = [[1, 0, 0, 0, 0, 0, -2, 0], [0, 1, 0, 0, 0, 0, 0, -1], [1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1], [1, 0, -1, 0, -1, 0, -1, 0], [0, 0, 0, 0, 0, 0, 0, -1], [0, 0, 0, 0, -1, 0, -1, 0], [0, 0, 0, 2, 0, 0, 0, 0]]
 
 
 def obtainSingleActionOfPiece(pieceID, lastPositions, actions, First=True):
     _actions = actions
     _lastPositions = lastPositions
     _fixed = False
-
+    
+    print(_lastPositions)
     if _lastPositions:
         if type(_lastPositions[0][-1]) == type([]):
             directions = _lastPositions[0].pop(-1)
             _fixed = True
+            
         else:
             directions = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
             if pieceID == 1:
                 directions = directions[:2]
             elif pieceID == -1:
                 directions = directions[2:]
-        print(directions)
 
         pos = _lastPositions.pop(0)
         for dirY, dirX in directions:
@@ -29,13 +30,12 @@ def obtainSingleActionOfPiece(pieceID, lastPositions, actions, First=True):
                         # promoted and no take
                         positions = pos + [nextY, nextX]
                         positions.append([[dirX, dirY]])
+                        
+                        if()
                         _lastPositions.append(positions)
-                        if _fixed:
-                            _actions.append(positions[:-1])
-                            obtainSingleActionOfPiece(pieceID, _lastPositions[:-1], _actions)
-                        else:
-                            _actions.append(positions)
-                            obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)
+                        
+                        _actions.append(positions)
+                        obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)
                     elif First:
                         # not promoted and no take
                         positions = pos + [nextY, nextX]
@@ -67,7 +67,7 @@ def obtainSingleActionOfPiece(pieceID, lastPositions, actions, First=True):
     
 def getActionsOfPiece(pieceID,coor):
     actions = obtainSingleActionOfPiece(pieceID, [coor], [])
-    print(f"actions outer: {coor} for {actions}")
+    
     return actions
 
 

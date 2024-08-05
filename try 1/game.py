@@ -59,6 +59,7 @@ def showBoard(move):
     
 def moveOfPlayer(playerObject):
     state = envi.boardToTuple().reshape(1, -1)  # Current state as a flattened array
+    print(envi.board)
     available_actions = envi.getActions(playerObject.pID)  # Get available actions for the current state
     if(not available_actions):
         return 0,0
