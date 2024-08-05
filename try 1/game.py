@@ -66,6 +66,7 @@ def moveOfPlayer(playerObject):
         action = playerObject.choose_action(state, available_actions)  # Choose an action
         reward,won = envi.makeAction(action,playerObject.pID)
         if(won):
+            playerObject.update(state, action, reward, [], available_actions, [])
             return 2,action
         else:
             next_state = envi.boardToTuple().reshape(1, -1)  # Get the next state

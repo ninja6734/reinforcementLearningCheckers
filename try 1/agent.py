@@ -30,10 +30,13 @@ class Agent:
         action_idx = available_actions.index(action)
         q_value = q_values[0, action_idx]
         
-        next_q_values = self.getQValues(next_state)
-        next_q_value = np.max(next_q_values[0, range(len(next_available_actions))])
-        
-        target = reward + self.gamma * next_q_value
+        if(next_state):
+            next_q_values = self.getQValues(next_state)
+            next_q_value = np.max(next_q_values[0, range(len(next_available_actions))])
+            
+            target = reward + self.gamma * next_q_value
+        else:
+            target = reward
         
         grad_output = np.zeros_like(q_values)
         grad_output[0, action_idx] = q_value - target
