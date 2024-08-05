@@ -59,7 +59,6 @@ def showBoard(move):
     
 def moveOfPlayer(playerObject):
     state = envi.boardToTuple().reshape(1, -1)  # Current state as a flattened array
-    print(envi.board)
     available_actions = envi.getActions(playerObject.pID)  # Get available actions for the current state
     if(not available_actions):
         return 0,0
@@ -82,6 +81,7 @@ def game(show = False):
     envi.resetBoard()
     moments = 1000
     moment = 0
+    winner = "no one"
     while moment < moments:
         win,action = moveOfPlayer(player1)
         if(0 == win):
@@ -107,11 +107,11 @@ def game(show = False):
 
     return winner
 
-def main(learn = False):
+def main(learn = False, rate = 4000):
     out = "y"
     if(learn):
     
-        for gme in range(4000):
+        for gme in range(rate):
             winner = game()
             print(gme)
         if(winner == "p1"):
@@ -125,4 +125,4 @@ def main(learn = False):
         while out == "y":
             print(f"winner: {game(show = True)}")
             input("continue? y/n")
-main()
+main(learn=True, rate= 1000000)

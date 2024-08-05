@@ -48,7 +48,7 @@ class Environment:
 
 
     def sendReward(self,enPiecesDestroyed: int, Promotion: bool, Won: bool):
-        self.reward = -20 + 30 * enPiecesDestroyed + 20 * int(Promotion) + 200 * int(Won)
+        self.reward = -1 + 3 * enPiecesDestroyed + 5 * int(Promotion) + 200 * int(Won)
     
     def makeAction(self,acts,piece):
         actsList = []
