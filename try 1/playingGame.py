@@ -2,11 +2,12 @@ from agent import Agent
 from env import Environment
 import tkinter as tk
 import pickle
-import ast
-import random
 
-def playerMove(pMove):
-    move = pMove
+move = {"value": False}
+
+def pickCurMove():
+    move["value"] = True
+    window.quit()
 
 player1 = Agent(64,32,100,1)
 f = open("qTable.pkl","rb")
@@ -21,8 +22,7 @@ text = tk.Label(window)
 text.pack()
 button = tk.Button(window,text="Next", command=lambda: window.quit())
 button.pack()
-Entry = tk.Text(window, width=100, height=1)
-Entry.pack()
+button2 = tk.Button(window,text="Pick this move", command= lambda: pickCurMove())
 
 def getFieldX(rowNum):
     return 50+rowNum * 40
@@ -96,15 +96,19 @@ def game(show = False):
             showBoard(action)
         
         availableActions = envi.getActions(-1)
-        print(envi.board)
-        showBoard("submit you action invalid = random (y1,x1,y2,x2) = move \n available actions include: "+ str(availableActions),fake=False)
-        try:
-            move = ast.literal_eval(move)
-        except:
-            move = random.choice(availableActions)
-        if(not move in availableActions):
-            move = random.choice(availableActions)
-        envi.makeAction(move,-1)
+        button2.pack()
+        move["value"] = False
+        while move["value"] == False:
+            for act in availableActions:
+                showBoard(act)
+                print(move)
+                if(move["value"] == True):
+                    break
+            if(move["value"] == True):
+                _act = act
+        envi.makeAction(_act,-1)
+        button2.pack_forget()
+            
 
         moment += 1
 

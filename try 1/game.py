@@ -125,4 +125,4 @@ def main(learn = False, rate = 4000):
         while out == "y":
             print(f"winner: {game(show = True)}")
             input("continue? y/n")
-main(learn=True, rate= 1000000)
+main()
