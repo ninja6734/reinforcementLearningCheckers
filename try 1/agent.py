@@ -29,8 +29,7 @@ class Agent:
         q_values = self.getQValues(state)
         action_idx = available_actions.index(action)
         q_value = q_values[0, action_idx]
-        
-        if(next_state):
+        if(len(next_state) > 0):
             next_q_values = self.getQValues(next_state)
             next_q_value = np.max(next_q_values[0, range(len(next_available_actions))])
             

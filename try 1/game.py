@@ -7,10 +7,10 @@ import pickle
 player1 = Agent(64,32,100,1)
 player2 = Agent(64,32,100,-1)
 
-f = open("qTable.pkl","rb")
-data = pickle.load(f)
-player1.load(data)
-player2.load(data)
+#f = open("qTable.pkl","rb")
+#data = pickle.load(f)
+#player1.load(data)
+#player2.load(data)
 
 envi = Environment()
 window = tk.Tk()
@@ -126,4 +126,4 @@ def main(learn = False, rate = 4000):
         while out == "y":
             print(f"winner: {game(show = True)}")
             input("continue? y/n")
-main()
+main(learn=True)
