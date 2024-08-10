@@ -2,7 +2,8 @@ from agent import Agent
 from env import Environment
 import tkinter as tk
 import pickle
-
+import concurrent.futures
+import time
 
 player1 = Agent(64,32,100,1)
 player2 = Agent(64,32,100,-1)
@@ -108,17 +109,26 @@ def game(show = False):
 
     return winner
 
-def main(learn = False, rate = 4000):
+def run_parallel_games(num_games=1000):
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        results = list(executor.map(game, [False for x in range(num_games)]))
+
+    return results
+
+def main(learn = False, rate = 4000, multiprocessing = True, multiThreads = 1000):
     out = "y"
     if(learn):
-    
-        for gme in range(rate):
-            winner = game()
-            print(gme)
-        if(winner == "p1"):
-            data = player1.model
+        if(multiprocessing):
+            rounds = rate // multiThreads
+            for gme in range(rounds):
+                winners = run_parallel_games(multiThreads)
+                print(winners)
+            winners = run_parallel_games(rate - rounds * multiThreads)
         else:
-            data = player2.model
+            for gme in range(rate):
+                winner = game()
+                print(gme)
+        data = player1.model
         f = open("qTable.pkl","wb")
         pickle.dump(data, f)
     else:
@@ -126,9 +136,14 @@ def main(learn = False, rate = 4000):
         while out == "y":
             print(f"winner: {game(show = True)}")
             input("continue? y/n")
-main(learn=True, rate=1000000)
-model = player1.model
-print(f"bias1 : {model.bias1}")
-print(f"bias2 : {model.bias2}")
-print(f"weights1: {model.weights1}")
-print(f"weights2: {model.weights2}")
+            
+if __name__ == "__main__":
+    x = time.time()
+    main(learn=True, rate=3000, multiThreads=3000)
+    x = time.time() - x
+    print(x)
+    model = player1.model
+    print(f"bias1 : {model.bias1}")
+    print(f"bias2 : {model.bias2}")
+    print(f"weights1: {model.weights1}")
+    print(f"weights2: {model.weights2}")
