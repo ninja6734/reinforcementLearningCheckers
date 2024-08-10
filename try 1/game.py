@@ -126,4 +126,9 @@ def main(learn = False, rate = 4000):
         while out == "y":
             print(f"winner: {game(show = True)}")
             input("continue? y/n")
-main(learn=True)
+main(learn=True, rate=1000000)
+model = player1.model
+print(f"bias1 : {model.bias1}")
+print(f"bias2 : {model.bias2}")
+print(f"weights1: {model.weights1}")
+print(f"weights2: {model.weights2}")

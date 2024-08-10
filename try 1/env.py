@@ -47,8 +47,8 @@ class Environment:
         return [destroyedPieces, Promotion, won]
 
 
-    def sendReward(self,enPiecesDestroyed: int, Promotion: bool, Won: bool):
-        self.reward = -1 + 3 * enPiecesDestroyed + 5 * int(Promotion) + 100 * int(Won)
+    def sendReward(self,enPiecesDestroyed: int, Promotion: bool, Won: bool, actionsEnemy: int):
+        self.reward = -1 + 3 * enPiecesDestroyed + 5 * int(Promotion) + 100 * int(Won) - len(actionsEnemy)* 2
     
     def makeAction(self,acts,piece):
         actsList = []
@@ -56,12 +56,12 @@ class Environment:
             actsList.append([acts[act*2],acts[act*2+1]])
 
         res = self.changeEnv(actsList,piece)
-        self.sendReward(res[0], res[1], res[2])
+        self.sendReward(res[0], res[1], res[2], self.getActions(piece * -1))
         return self.reward,res[2]
     
     def isInActionList(self,actionList,act):
         _actionList = []
-        for index in range(len(actionList)//2):
+        for index in range(len(actionList)//2-1):
               _actionList.append([actionList[index*2],actionList[index*2+1]])
         return act in _actionList
     def obtainSingleActionOfPiece(self,pieceID, lastPositions, actions, First=True):
@@ -108,7 +108,7 @@ class Environment:
                                 if testingSpace == 0:
                                     positions = pos + [nextY, nextX, nextY + dirY, nextX + dirX]
                                     
-                                    if(not self.isInActionList(positions, [nextY, nextX])):
+                                    if(not self.isInActionList(positions, [nextY+dirY, nextX+dirX])):
                                         _lastPositions.append(positions)
                                     _actions.append(positions)
                                     self.obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)
@@ -116,7 +116,7 @@ class Environment:
                                 # not promoted and a take
                                 if testingSpace == 0:
                                     positions = pos + [nextY, nextX, nextY + dirY, nextX + dirX]
-                                    if(not self.isInActionList(positions, [nextY, nextX])):
+                                    if(not self.isInActionList(positions, [nextY+dirY, nextX+dirX])):
                                         _lastPositions.append(positions)
                                     _actions.append(positions)
                                     self.obtainSingleActionOfPiece(pieceID, _lastPositions, _actions, First=False)

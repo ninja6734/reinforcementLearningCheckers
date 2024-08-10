@@ -10,9 +10,9 @@ def pickCurMove():
     window.quit()
 
 player1 = Agent(64,32,100,1)
-f = open("qTable.pkl","rb")
-data = pickle.load(f)
-player1.load(data)
+#f = open("qTable.pkl","rb")
+#data = pickle.load(f)
+#player1.load(data)
 envi = Environment()
 window = tk.Tk()
 window.geometry("600x600")

@@ -23,6 +23,12 @@ class NeuralNetwork:
         grad_weights1 = np.dot(x.T, grad_z1)
         grad_bias1 = np.sum(grad_z1, axis=0, keepdims=True)
         
+        #added gradient clipping to ensure NaN is not reached
+        grad_weights1 = np.clip(grad_weights1, -1, 1)
+        grad_bias1 = np.clip(grad_bias1, -1, 1)
+        grad_weights2 = np.clip(grad_weights2, -1, 1)
+        grad_bias2 = np.clip(grad_bias2, -1, 1)
+        
         self.weights1 -= learning_rate * grad_weights1
         self.bias1 -= learning_rate * grad_bias1
         self.weights2 -= learning_rate * grad_weights2
