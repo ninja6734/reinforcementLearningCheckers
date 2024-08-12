@@ -24,7 +24,7 @@ class Agent:
         q_values = q_values[0, range(len(available_actions))]
         index = np.argmax(q_values)
         return available_actions[index]
-
+    
     def update(self, state, action, reward, next_state, available_actions, next_available_actions):
         q_values = self.getQValues(state)
         action_idx = available_actions.index(action)

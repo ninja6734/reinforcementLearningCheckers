@@ -1,10 +1,10 @@
-board = [[2, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]
+board = [[0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 2, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]
 
 
 def isInActionList(actionList,act):
         _actionList = []
         for index in range(len(actionList)//2-1):
-              _actionList.append([actionList[index*2],actionList[index*2+1]])
+            _actionList.append([actionList[index*2],actionList[index*2+1]])
         return act in _actionList
 def obtainSingleActionOfPiece(pieceID, lastPositions, actions, First=True):
         _actions = actions
@@ -20,20 +20,23 @@ def obtainSingleActionOfPiece(pieceID, lastPositions, actions, First=True):
                     directions = directions[:2]
                 elif pieceID == -1:
                     directions = directions[2:]
-
+            print(f"position: {_lastPositions}")
             pos = _lastPositions.pop(0)
             for dirY, dirX in directions:
                 nextX = pos[-1] + dirX
                 nextY = pos[-2] + dirY
+                print(f"directions: {directions}")
+                print(f"nextX: {nextX} nextY: {nextY}")
                 if 0 <= nextX < 8 and 0 <= nextY < 8:
                     testingSpace = board[nextY][nextX]
                     if testingSpace == 0:
                         if abs(pieceID) == 2:
                             # promoted and no take
                             positions = pos + [nextY, nextX]
-                            positions.append([[dirX, dirY]])
+                            positions.append([[dirY, dirX]])
                             if(not isInActionList(positions, [nextY, nextX])):
                                 _lastPositions.append(positions)
+                                print(_lastPositions)
                             
                             _actions.append(positions)
                             obtainSingleActionOfPiece(pieceID, _lastPositions, _actions)

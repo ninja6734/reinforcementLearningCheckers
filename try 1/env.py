@@ -48,7 +48,7 @@ class Environment:
 
 
     def sendReward(self,enPiecesDestroyed: int, Promotion: bool, Won: bool, actionsEnemy: int):
-        self.reward = -1 + 3 * enPiecesDestroyed + 5 * int(Promotion) + 100 * int(Won) - len(actionsEnemy)* 2
+        self.reward = -1 + 3 * enPiecesDestroyed + 8 * int(Promotion) + 100 * int(Won) + len(actionsEnemy)* 3
     
     def makeAction(self,acts,piece):
         actsList = []
@@ -89,7 +89,7 @@ class Environment:
                         if abs(pieceID) == 2:
                             # promoted and no take
                             positions = pos + [nextY, nextX]
-                            positions.append([[dirX, dirY]])
+                            positions.append([[dirY, dirX]])
                             if(not self.isInActionList(positions, [nextY, nextX])):
                                 _lastPositions.append(positions)
                             

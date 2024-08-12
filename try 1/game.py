@@ -5,8 +5,8 @@ import pickle
 import concurrent.futures
 import time
 
-player1 = Agent(64,32,100,1)
-player2 = Agent(64,32,100,-1)
+player1 = Agent(64,32,400,1)
+player2 = Agent(64,32,400,-1)
 
 #f = open("qTable.pkl","rb")
 #data = pickle.load(f)
@@ -57,7 +57,6 @@ def showBoard(move):
     showField(canvas,move)
 
     window.mainloop()
-    
 def moveOfPlayer(playerObject):
     state = envi.boardToTuple().reshape(1, -1)  # Current state as a flattened array
     available_actions = envi.getActions(playerObject.pID)  # Get available actions for the current state
@@ -109,7 +108,7 @@ def game(show = False):
 
     return winner
 
-def run_parallel_games(num_games=1000):
+def run_parallel_games(num_games):
     with concurrent.futures.ProcessPoolExecutor() as executor:
         results = list(executor.map(game, [False for x in range(num_games)]))
 
@@ -122,7 +121,7 @@ def main(learn = False, rate = 4000, multiprocessing = True, multiThreads = 1000
             rounds = rate // multiThreads
             for gme in range(rounds):
                 winners = run_parallel_games(multiThreads)
-                print(winners)
+                print(f"{gme * multiThreads / rate * 100}% done")
             winners = run_parallel_games(rate - rounds * multiThreads)
         else:
             for gme in range(rate):
@@ -138,10 +137,7 @@ def main(learn = False, rate = 4000, multiprocessing = True, multiThreads = 1000
             input("continue? y/n")
             
 if __name__ == "__main__":
-    x = time.time()
-    main(learn=True, rate=3000, multiThreads=3000)
-    x = time.time() - x
-    print(x)
+    main(learn=True, rate=1000000, multiprocessing=True, multiThreads=1000)
     model = player1.model
     print(f"bias1 : {model.bias1}")
     print(f"bias2 : {model.bias2}")
